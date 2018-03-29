@@ -1,0 +1,41 @@
+-   repo: https://github.com/pre-commit/pre-commit
+    sha: v0.15.0
+    hooks:
+    -   id: validate_config
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    sha: v1.1.1
+    hooks:
+    -   id: check-added-large-files
+    -   id: check-ast
+    -   id: check-case-conflict
+    -   id: check-json
+    -   id: check-merge-conflict
+    -   id: check-symlinks
+    -   id: end-of-file-fixer
+    -   id: pretty-format-json
+        args:
+        - --autofix
+    -   id: requirements-txt-fixer
+    -   id: trailing-whitespace
+-   repo: https://github.com/asottile/reorder_python_imports
+    sha: v0.3.5
+    hooks:
+    -   id: reorder-python-imports
+        excludes: >
+            (?x)^(
+                setup.py|
+            )$
+-   repo: git://github.com/pre-commit/mirrors-yapf
+    sha: v0.19.0
+    hooks:
+    -   id: yapf
+        args:
+         - -p
+         - -i
+         - -r
+-   repo: git://github.com/dnephin/pre-commit-golang
+    sha: 823c25f40e37d52765b6469de6df94c08e678784
+    hooks:
+    - id: go-fmt
+    - id: no-go-testing
+    # - id: gometalinter  It's noisy
