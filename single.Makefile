@@ -25,6 +25,7 @@ $(shell cat checksum.extracted.sha512 | cut -f3 -d ' '): extracted/.done
 extracted/.done: raw/.done 	
 	@mkdir -p extracted
 	@find raw -type f -name "*.tar" | parallel -k tar -xf {} --strip-components=1 -Cextracted
+	@find raw -type f -name "*.tgz" | parallel -k tar -xzf {} --strip-components=1 -Cextracted
 	@echo "extracted all files from raw/ to extracted/"
 	@touch $@
 
