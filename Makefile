@@ -12,7 +12,7 @@ clean-%:
 	@$(MAKE) --no-print-directory $($*_EXTRA) clean -f ../single.Makefile
 check-%:
 	@$(MAKE) --no-print-directory $($*_EXTRA) check-raw -f ../single.Makefile
-	@$(MAKE) --no-print-directory $($*_EXTRA) check-extracted -f ../single.Makefile
+	# @$(MAKE) --no-print-directory $($*_EXTRA) check-extracted -f ../single.Makefile
 create-check-%:
 	@$(MAKE) --no-print-directory $($*_EXTRA) --always-make checksum.raw.sha512 -f ../single.Makefile
-	@$(MAKE) --no-print-directory $($*_EXTRA) --always-make checksum.extracted.sha512 -f ../single.Makefile
+	# @$(MAKE) --no-print-directory $($*_EXTRA) --always-make checksum.extracted.sha512 -f ../single.Makefile
