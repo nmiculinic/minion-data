@@ -3,7 +3,7 @@ REF_URL := "UNSET!!!"
 
 ## Raw files related stuff
 raw/%:
-	@echo "downloading missing raw files $@"
+	@echo "downloading missing raw files $@ to $$(pwd)/raw"
 	@mkdir -p raw
 	wget $(BASE_URL)/$* -P raw
 checksum.raw.sha512:
@@ -21,8 +21,9 @@ check-raw: $(shell cat checksum.raw.sha512 | cut -f3 -d ' ')
 
 
 ## Extract related stuff
-$(shell cat checksum.extracted.sha512 | cut -f3 -d ' '): extracted/.done
-extracted/.done: raw/.done 	
+# $(shell cat checksum.extracted.sha512 | cut -f3 -d ' '): extracted/.done
+extracted/.done: raw/.done
+	@echo "Extracting the raw tars to $$(pwd)/extracted"
 	@mkdir -p extracted
 	@find raw -type f -name "*.tar" | parallel -k tar -xf {} --strip-components=1 -Cextracted
 	@echo "extracted all files from raw/ to extracted/"
@@ -35,20 +36,22 @@ checksum.extracted.sha512:
 check-extracted: extract
 	sha512sum -c checksum.extracted.sha512
 
-## Flatten all reads into single directory 
-flattened/.done: $(shell cat checksum.extracted.sha512 | cut -f3 -d ' ')
+## Flatten all reads into single directory
+flattened/.done: extracted/.done
 	@mkdir -p flattened
+	@echo "Flattening the extracted files to $$(pwd)/flattened"
 	@find extracted -type f -not -path '*/\.*' -exec ln -s {} -t flattened \;
 	@echo "flattened all files"
 	@touch $@
 
-flatten: flattened/.mark
+flatten: flattened/.done
 	@:
 
-all-reads.txt: flattened/.done download
+all-reads.txt: flattened/.done raw/.done
 	@find flattened -mindepth 1 -not -path '*/\.*'  > all-reads.txt
 
 sample: flattened/.done
+	@echo "Sampling the flattened files to $$(pwd)/sample"
 	@rm -Rf sample
 	@mkdir sample
 	@find extracted -type f | shuf | head | parallel -k cp {} sample
@@ -58,7 +61,4 @@ clean:
 ref.fasta:
 	@wget $(REF_URL) -O ref.fasta
 
-
-tt:
-	$(MAKE) -C tt sample
-.PHONY: extract download sample check-raw check-extracted tt 
+.PHONY: extract download sample check-raw check-extracted tt
