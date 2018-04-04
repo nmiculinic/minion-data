@@ -1,7 +1,9 @@
 ref.fasta
 raw/
 extracted/
+flattened/
 sample/
+checksum.extracted.sha512
 
 r9.4-ecoli-loman/Ecoli_MinKNOW_1.4_RAD002_Sambrook.tar
 
