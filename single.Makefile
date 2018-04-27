@@ -25,8 +25,8 @@ check-raw: $(shell cat checksum.raw.sha512 | cut -f3 -d ' ')
 extracted/.done: raw/.done
 	@echo "Extracting the raw tars to $$(pwd)/extracted"
 	@mkdir -p extracted
-	@find raw -type f -name "*.tar" | parallel -k tar -xf {} --strip-components=1 -Cextracted
-	@find raw -type f -name "*.tgz" | parallel -k tar -xzf {} --strip-components=1 -Cextracted
+	@find raw -type f -name "*.tar" | parallel -k tar -xf {} -C extracted
+	@find raw -type f -name "*.tgz" | parallel -k tar -xzf {} -C extracted
 	@echo "extracted all files from raw/ to extracted/"
 	@touch $@
 
@@ -41,7 +41,7 @@ check-extracted: extract
 flattened/.done: extracted/.done
 	@mkdir -p flattened
 	@echo "Flattening the extracted files to $$(pwd)/flattened"
-	@find extracted -type f -not -path '*/\.*' -exec ln -s {} -t flattened \;
+	@find extracted -type f -not -path '*/\.*' -exec ln -sr {} -t flattened \;
 	@echo "flattened all files"
 	@touch $@
 
