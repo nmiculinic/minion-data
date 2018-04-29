@@ -12,7 +12,7 @@ r9.4-sample_EXTRA := -C r9.4-sample -e BASE_URL="" -e REF_URL='https://www.ncbi.
 
 sample-%:
 	@$(MAKE) --no-print-directory $($*_EXTRA) -L sample -f ../single.Makefile
-	@$(MAKE) --no-print-directory $($*_EXTRA) -L ref.fasta -f ../single.Makefile
+#	@$(MAKE) --no-print-directory $($*_EXTRA) -L ref.fasta -f ../single.Makefile
 clean-%:
 	@$(MAKE) --no-print-directory $($*_EXTRA) clean -f ../single.Makefile
 check-%:

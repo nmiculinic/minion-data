@@ -55,7 +55,7 @@ sample: flattened/.done
 	@echo "Sampling the flattened files to $$(pwd)/sample"
 	@rm -Rf sample
 	@mkdir sample
-	@find extracted -type f | shuf | head | parallel -k cp {} sample
+	@find extracted -type f | shuf | head | parallel -k ln {} sample
 	@echo "sampled 10 files"
 clean:
 	rm -Rf extracted flattened sample
