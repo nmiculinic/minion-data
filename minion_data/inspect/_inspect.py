@@ -36,6 +36,12 @@ def debug_output(pb: dataset_pb2.DataPoint, screen_width: int = 120):
         )
         print("------", "-" * screen_width)
 
+def count(x):
+    sol = 0
+    for _ in x:
+        sol += 1
+    return sol
+
 def calc_stats(dp: dataset_pb2.DataPoint) -> pd.DataFrame:
     items = []
     signal = np.array(dp.signal)
@@ -46,6 +52,10 @@ def calc_stats(dp: dataset_pb2.DataPoint) -> pd.DataFrame:
     items.append(("Signal value std", np.std(signal)))
     items.append(("Basecalled length", len(dp.basecalled)))
     items.append(("Reference length", len(dp.aligned_ref)))
+    items.append(("Match Rate", count(filter(lambda x:x == dataset_pb2.MATCH, dp.cigar))/ len(dp.aligned_ref)))
+    items.append(("Mismatch Rate", count(filter(lambda x:x == dataset_pb2.MISMATCH, dp.cigar))/ len(dp.aligned_ref)))
+    items.append(("Insertion Rate", count(filter(lambda x:x == dataset_pb2.INSERTION, dp.cigar))/ len(dp.aligned_ref)))
+    items.append(("Deletion Rate", count(filter(lambda x:x == dataset_pb2.DELETION, dp.cigar))/ len(dp.aligned_ref)))
     items.append(("Signal sample/bases", len(signal) / len(dp.basecalled) ))
     return pd.DataFrame(items, columns=("Attribute", "Value"))
 
