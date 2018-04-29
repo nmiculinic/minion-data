@@ -5,6 +5,7 @@ flattened/
 sample/
 chiron_out/
 work_flatten/
+dataset/
 checksum.extracted.sha512
 !r9.4-sample/raw
 !r9.4-sample/raw/*
