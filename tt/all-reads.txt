@@ -1,3 +1,0 @@
-flattened
-flattened/b
-flattened/a
