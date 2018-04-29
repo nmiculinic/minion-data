@@ -26,6 +26,7 @@ extracted/.done: raw/.done
 	@echo "Extracting the raw tars to $$(pwd)/extracted"
 	@mkdir -p extracted
 	@find raw -type f -name "*.tar" | parallel -k tar -xf {} -C extracted
+	@find raw -type f -name "*.tar.gz" | parallel -k tar -xf {} -C extracted
 	@find raw -type f -name "*.tgz" | parallel -k tar -xzf {} -C extracted
 	@echo "extracted all files from raw/ to extracted/"
 	@touch $@
