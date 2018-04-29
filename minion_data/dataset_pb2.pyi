@@ -55,7 +55,7 @@ class DataPoint(Message):
     aligned_ref = ... # type: RepeatedScalarFieldContainer[BasePair]
     aligned_ref_squiggle = ... # type: RepeatedScalarFieldContainer[BasePair]
     basecalled_squiggle = ... # type: RepeatedScalarFieldContainer[BasePair]
-    
+
     def __init__(self,
         signal : Iterable[float] = None,
         basecalled : Iterable[BasePair] = None,

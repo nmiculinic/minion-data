@@ -30,4 +30,3 @@ message DataPoint {
     repeated BasePair aligned_ref_squiggle = 10; // Which is the reference string for this read after aligning, BLANKS inserted for aligments
     repeated BasePair basecalled_squiggle = 11; // What the  BLANKS inserted for aligments
 }
-

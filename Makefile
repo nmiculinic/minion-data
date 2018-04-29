@@ -3,6 +3,24 @@
 proto: .FORCE
 	python -m grpc_tools.protoc -I $$(pwd)/protos --mypy_out=./minion_data --python_out=./minion_data $$(pwd)/protos/*
 
+USERNAME=""
+TAG="latest"
+
+ifeq ($(strip $(USERNAME)), "")
+	BASE_TAG=""
+else
+	BASE_TAG=$(USERNAME)/
+endif
+
+docker-build:
+	docker build -t $(BASE_TAG)minion_data:$(TAG)  .
+
+.PHONY: docker-build
+
+docker-push: docker-build
+	docker push $(BASE_TAG)minion_data:$(TAG)
+.PHONY: docker-push
+
 sample-make-sample:
 	@$(MAKE) --no-print-directory -C r9.4-sample -e BASE_URL='MISSING!' REF_URL='https://www.ncbi.nlm.nih.gov/sviewer/viewer.cgi?tool=portal&save=file&log$=seqview&db=nuccore&report=fasta&id=1356591284&extrafeat=976&conwithfeat=on&hide-sequence=on' -L sample -f ../single.Makefile
 .PHONY: sample-make-sample

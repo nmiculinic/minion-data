@@ -1,10 +1,11 @@
 package main
 
 import (
-	"text/template"
-	"os"
 	"fmt"
+	"os"
+	"text/template"
 )
+
 /*
 
 tt_EXTRA := -C tt -e BASE_URL="" -e REF_URL=""
@@ -31,9 +32,9 @@ create-check-%:
 	@$(MAKE) --no-print-directory $($*_EXTRA) --always-make checksum.raw.sha512 -f ../single.Makefile
 	# @$(MAKE) --no-print-directory $($*_EXTRA) --always-make checksum.extracted.sha512 -f ../single.Makefile
 
- */
+*/
 
- const tmpl = `
+const tmpl = `
 {{- $extra := printf "-C %s -e BASE_URL='%s' REF_URL='%s'" .Folder .BaseURL .RefURL -}}
 {{ .Name }}-make-sample:
 {{ print "\t" -}} @$(MAKE) --no-print-directory {{ $extra }} -L sample -f ../single.Makefile
@@ -65,11 +66,12 @@ create-check-%:
 `
 
 type Item struct {
-	Name string
+	Name    string
 	BaseURL string
-	RefURL string
-	Folder string
+	RefURL  string
+	Folder  string
 }
+
 const EColiRef = "https://www.ncbi.nlm.nih.gov/sviewer/viewer.cgi?tool=portal&save=file&log$=seqview&db=nuccore&report=fasta&id=1356591284&extrafeat=976&conwithfeat=on&hide-sequence=on"
 
 func main() {
@@ -77,34 +79,52 @@ func main() {
 .FORCE:
 proto: .FORCE
 	python -m grpc_tools.protoc -I $$(pwd)/protos --mypy_out=./minion_data --python_out=./minion_data $$(pwd)/protos/*
+
+USERNAME=""
+TAG="latest"
+
+ifeq ($(strip $(USERNAME)), "")
+	BASE_TAG=""
+else
+	BASE_TAG=$(USERNAME)/
+endif
+
+docker-build:
+	docker build -t $(BASE_TAG)minion_data:$(TAG)  .
+
+.PHONY: docker-build
+
+docker-push: docker-build
+	docker push $(BASE_TAG)minion_data:$(TAG)
+.PHONY: docker-push
 `)
 	t := template.Must(template.New("x").Parse(tmpl))
 	for _, f := range []Item{
 		{
-			Name: "sample",
-			Folder:"r9.4-sample",
-			RefURL:EColiRef,
-			BaseURL:"MISSING!",
+			Name:    "sample",
+			Folder:  "r9.4-sample",
+			RefURL:  EColiRef,
+			BaseURL: "MISSING!",
 		},
 		{
-			Name: "ecoli-loman",
-			Folder:"r9.4-ecoli-loman",
-			RefURL:EColiRef,
-			BaseURL:"http://s3.climb.ac.uk/nanopore",
+			Name:    "ecoli-loman",
+			Folder:  "r9.4-ecoli-loman",
+			RefURL:  EColiRef,
+			BaseURL: "http://s3.climb.ac.uk/nanopore",
 		},
 		{
-			Name: "ecoli-simpson",
-			Folder:"r9.4-ecoli-simpson",
-			RefURL:EColiRef,
-			BaseURL:"MISSING",
+			Name:    "ecoli-simpson",
+			Folder:  "r9.4-ecoli-simpson",
+			RefURL:  EColiRef,
+			BaseURL: "MISSING",
 		},
 		{
-			Name: "arabidopsis_thaliana-leggett",
-			Folder:"r9.4-arabidopsis_thaliana-leggett",
-			RefURL:"Unknown",
-			BaseURL:"MISSING",
+			Name:    "arabidopsis_thaliana-leggett",
+			Folder:  "r9.4-arabidopsis_thaliana-leggett",
+			RefURL:  "Unknown",
+			BaseURL: "MISSING",
 		},
-	}{
+	} {
 		t.Execute(os.Stdout, f)
 	}
 }

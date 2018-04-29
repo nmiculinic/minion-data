@@ -22,6 +22,3 @@ Helper files:
 * **ref.fasta.gmidx:** Graphmap's index
 
 Example one is r9.4-sample, others are names <chemistry>-<specie>-source.
-
-
-

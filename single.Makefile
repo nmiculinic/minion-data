@@ -91,4 +91,3 @@ chiron_basecall: basecalled.fastq
 
 alignment.sam: basecalled.fastq
 	../bin/graphmap $$(pwd) basecalled.fastq $@
-
