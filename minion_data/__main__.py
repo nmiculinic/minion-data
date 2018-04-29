@@ -1,8 +1,6 @@
 import argparse
-import time
 import logging
 import gzip
-from itertools import repeat
 from os import path
 import typing
 import os
