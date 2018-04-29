@@ -1,21 +1,106 @@
 import argparse
 import logging
+import gzip
 from os import path
+import os
+from tqdm import tqdm
 from typing import NamedTuple
 from .align_utils import get_target_sequences
+from . import dataset_pb2
+from . import bioinf_utils
+import numpy as np
 import sys
 
 
 class MinionDataCfg(NamedTuple):
     chiron_out: str
     sam_file: str
+    out: str
+
+def debug_output(pb: dataset_pb2.DataPoint, screen_width:int=120):
+    ttbl = {
+        dataset_pb2.MATCH: "=",
+        dataset_pb2.MISMATCH: "X",
+        dataset_pb2.INSERTION: "I",
+        dataset_pb2.DELETION: "D",
+    }
+
+    def ff(x):
+        if x == dataset_pb2.BLANK:
+           return "-"
+        return dataset_pb2.BasePair.Name(x)
+
+    for i in range(0, len(pb.cigar), screen_width):
+        print("CIGAR:", "".join([ttbl[x] for x in pb.cigar[i:i + screen_width]]))
+        print("BaseC:", "".join([ff(x) for x in pb.basecalled_squiggle[i:i + screen_width]]))
+        print("REF  :", "".join([ff(x) for x in pb.aligned_ref_squiggle[i:i + screen_width]]))
+        print("------", "-" * screen_width)
 
 
 def main(cfg: MinionDataCfg):
     if not path.isfile(cfg.sam_file):
         raise ValueError(f"{cfg.sam_file} isn't a file")
-    for name, v in get_target_sequences(cfg.sam_file).items():
-        target, ref_name, start_pos, length, cigar_str = v  # target & cigar_str are important
+    os.makedirs(cfg.out, exist_ok=True)
+    for name, v in tqdm(get_target_sequences(cfg.sam_file).items(), desc="making protobuffs"):
+        ref, _, _, _, cigar_str = v  # target & cigar_str are important
+        ref = [dataset_pb2.BasePair.Value(x) for x in ref.upper()]
+        sol = dataset_pb2.DataPoint(
+            aligned_ref=ref,
+        )
+        with open(path.join(cfg.chiron_out, "raw", name + ".signal"), "r") as f:
+            signal = np.array(f.readlines()[0].split(), dtype=np.float)
+            sol.MergeFrom(dataset_pb2.DataPoint(signal=signal))
+
+        with open(path.join(cfg.chiron_out, "labels", name + ".label"), "r") as f:
+            lower_bound = []
+            bcall = []
+            for l, _, b in [x.split() for x in f.readlines() if len(x)]:
+                lower_bound.append(np.int(l))
+                bcall.append(dataset_pb2.BasePair.Value(b))
+            sol.MergeFrom(dataset_pb2.DataPoint(
+                basecalled=bcall,
+                lower_bound=lower_bound,
+            ))
+
+        ref_idx = 0
+        bcall_idx = 0
+
+        aligned_ref_squiggle = []
+        basecalled_squiggle = []
+        cigar_lst = []
+
+        for cigar in cigar_str:
+            if cigar in bioinf_utils.CIGAR_MATCH_MISSMATCH:
+                cigar_lst.append(dataset_pb2.MATCH if cigar in bioinf_utils.CIGAR_MATCH else dataset_pb2.MISMATCH)
+                aligned_ref_squiggle.append(ref[ref_idx])
+                basecalled_squiggle.append(bcall[bcall_idx])
+                ref_idx+=1
+                bcall_idx+=1
+            elif cigar in bioinf_utils.CIGAR_INSERTION:
+                cigar_lst.append(dataset_pb2.INSERTION)
+                basecalled_squiggle.append(bcall[bcall_idx])
+                aligned_ref_squiggle.append(dataset_pb2.BLANK)
+                bcall_idx+=1
+            elif cigar in bioinf_utils.CIGAR_DELETION:
+                cigar_lst.append(dataset_pb2.DELETION)
+                basecalled_squiggle.append(dataset_pb2.BLANK)
+                aligned_ref_squiggle.append(ref[ref_idx])
+                ref_idx+=1
+            else:
+                raise ValueError(f"Not sure what to do with {cigar}")
+
+        assert len(cigar_lst) == len(aligned_ref_squiggle)
+        assert len(cigar_lst) == len(basecalled_squiggle)
+        assert ref_idx == len(ref)
+        assert bcall_idx == len(bcall)
+
+        sol.MergeFrom(dataset_pb2.DataPoint(
+            cigar=cigar_lst,
+            aligned_ref_squiggle=aligned_ref_squiggle,
+            basecalled_squiggle=basecalled_squiggle,
+        ))
+        with gzip.open(path.join(cfg.out, name +".datapoint"), "w") as f:
+            f.write(sol.SerializeToString())
 
 
 if __name__ == "__main__":
@@ -23,6 +108,7 @@ if __name__ == "__main__":
     parser.add_argument("--default-root")
     parser.add_argument("--chiron-out")
     parser.add_argument("--sam_file")
+    parser.add_argument("--out", "-o", help="output folder")
     parser.add_argument("--debug", "-v", action="store_true")
     args = parser.parse_args()
     if args.default_root is not None:
@@ -31,6 +117,9 @@ if __name__ == "__main__":
         )
         args.sam_file = args.sam_file or path.join(
             args.default_root, "alignment.sam"
+        )
+        args.out = args.out or path.join(
+            args.default_root, "dataset"
         )
     if args.chiron_out is None or args.sam_file is None:
         print(
@@ -46,5 +135,6 @@ if __name__ == "__main__":
     cfg = MinionDataCfg(
         chiron_out=path.abspath(args.chiron_out),
         sam_file=path.abspath(args.sam_file),
+        out=path.abspath(args.out),
     )
     main(cfg)
