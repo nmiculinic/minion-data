@@ -3,4 +3,4 @@
 echo $@
 echo "dir: $1"
 echo "using ${MINION_DATA:="nmiculinic/minion_data"} as image"
-docker run -it --rm -u=`id -u`:`id -g` -v $1:/data ${MINION_DATA} --default-root /data
+docker run -it --rm -u=`id -u`:`id -g` -v $1:/data ${MINION_DATA} prepare_dataset --default-root /data
