@@ -1,5 +1,23 @@
 
-Folder structure:
+### Requriments
+
+This aims to have minimal requirements, due to putting everything in docker containers. Still some are obligatory:
+
+* docker
+* make
+* parallel
+* wget
+
+### Usage:
+
+Most common usage is:
+```
+make <dataset name>-prepare_dataset
+```
+
+and it will do everything automatically. The Makefile is generated from `gen.go` so it's worth checking it out.
+
+### Folder structure:
 
 * **bin:** Various binary utilites to make this possible
 * **minion_data** Root package folder for further data processing

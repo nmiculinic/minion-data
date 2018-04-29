@@ -71,7 +71,7 @@ sample: flattened/.done
 	@find extracted -type f -name '*.fast5' | shuf | head | parallel -k ln {} sample
 	@echo "sampled 10 files"
 clean:
-	rm -Rf extracted flattened sample work_flatten
+	rm -Rf extracted flattened sample work_flatten dataset
 ref.fasta:
 	@wget $(REF_URL) -O ref.fasta
 
@@ -88,6 +88,15 @@ basecalled.fastq: chiron_out/.done
 chiron_basecall: basecalled.fastq
 	@:
 .PHONY: chiron_basecall
+
+dataset/.done: basecalled.fastq chiron_out/.done
+	../bin/prepare_dataset $$(pwd)
+	@echo "Finished dataset preparation"
+	@touch $@
+
+prepare_dataset: dataset/.done
+   @:
+.PHONY: prepare_dataset
 
 alignment.sam: basecalled.fastq
 	../bin/graphmap $$(pwd) basecalled.fastq $@

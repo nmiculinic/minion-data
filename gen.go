@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"text/template"
+	"log"
 )
 
 /*
@@ -63,13 +64,17 @@ const tmpl = `
 {{ .Name }}-align:
 {{ print "\t" -}} @$(MAKE) --no-print-directory {{ $extra }} -L alignment.sam -f ../single.Makefile
 .PHONY: {{ .Name }}-align
+
+{{ .Name }}-prepare_dataset:
+{{ print "\t" -}} @$(MAKE) --no-print-directory {{ $extra }} -L prepare_dataset -f ../single.Makefile
+.PHONY: {{ .Name }}-prepare_dataset
 `
 
 type Item struct {
-	Name    string
-	BaseURL string
-	RefURL  string
-	Folder  string
+	Name    string // Alias for running
+	BaseURL string // BaseURL for downloading raw files
+	RefURL  string // URL for downloading ref.fasta, that is reference genome
+	Folder  string // Folder where all data should be saved/processed
 }
 
 const EColiRef = "https://www.ncbi.nlm.nih.gov/sviewer/viewer.cgi?tool=portal&save=file&log$=seqview&db=nuccore&report=fasta&id=1356591284&extrafeat=976&conwithfeat=on&hide-sequence=on"
@@ -125,6 +130,17 @@ docker-push: docker-build
 			BaseURL: "MISSING",
 		},
 	} {
-		t.Execute(os.Stdout, f)
+		if f.Name != "" {
+			if err := t.Execute(os.Stdout, f); err != nil {
+				log.Fatal(err)
+			}
+		}
+		// for aliased datasets
+		if f.Name != f.Folder {
+			f.Name = f.Folder
+			if err := t.Execute(os.Stdout, f); err != nil {
+				log.Fatal(err)
+			}
+		}
 	}
 }
