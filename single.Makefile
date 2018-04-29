@@ -63,3 +63,13 @@ ref.fasta:
 	@wget $(REF_URL) -O ref.fasta
 
 .PHONY: extract download sample check-raw check-extracted tt
+
+chiron_out/.done: flattened/.done
+	../bin/chiron_basecall $$(pwd) flattened chiron_out
+	@echo "Basecalled all files with chiron"
+	@touch $@
+
+chiron_basecall: chiron_out/.done
+    @:
+
+.PHONY: chiron_basecall

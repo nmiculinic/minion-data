@@ -1,0 +1,7 @@
+#!/bin/sh
+# folder, input path within foler, output path within folder
+echo $@
+echo $1
+echo $2
+echo $3
+docker run --rm -it -v $1:/data nmiculinic/chiron:latest-py3 call --batch_size 1000 -i /data/$2 -o /data/$3

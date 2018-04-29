@@ -53,6 +53,10 @@ create-check-%:
 {{ .Name }}-create-check:
 {{ print "\t" -}}@$(MAKE) --no-print-directory {{ $extra }} --always-make checksum.raw.sha512 -f ../single.Makefile
 .PHONY: {{ .Name }}-create-check
+
+{{ .Name }}-chiron_basecall:
+{{ print "\t" -}} @$(MAKE) --no-print-directory {{ $extra }} -L chiron_basecall -f ../single.Makefile
+.PHONY: {{ .Name }}-chiron_basecall
 `
 
 type Item struct {
