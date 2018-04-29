@@ -13,5 +13,5 @@ if [ -z ${CHRION_GPU+x} ]; then
 else
     CHIRON_IMAGE="$CHIRON_IMAGE-gpu"
     echo "Using $CHIRON_IMAGE GPU edition"
-    docker run --rm -it -u=`id -u`:`id -g` --runtime=nvidia -v $1:/data $CHIRON_IMAGE chiron call --batch_size $CHIRON_BATCH_SIZE -i /data/$2 -o /data/$3
+    docker run --rm -it -u=`id -u`:`id -g` -e NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0} --runtime=nvidia -v $1:/data $CHIRON_IMAGE chiron call --batch_size $CHIRON_BATCH_SIZE -i /data/$2 -o /data/$3
 fi
