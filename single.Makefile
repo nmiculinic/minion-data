@@ -1,5 +1,6 @@
 BASE_URL := "UNSET!!!"
 REF_URL := "UNSET!!!"
+WORKING_SAMPLE_SIZE=2000
 
 ## Raw files related stuff
 raw/%:
@@ -49,6 +50,17 @@ flattened/.done: extracted/.done
 flatten: flattened/.done
 	@:
 
+work_flatten/.done: flattened/.done
+	@echo "Sampling $(WORKING_SAMPLE_SIZE) flattened files to $$(pwd)/work_flatten"
+	@rm -Rf work_flatten
+	@mkdir work_flatten
+	@find flattened \( -type f -or -type l \) -name '*.fast5' | shuf | head -n $(WORKING_SAMPLE_SIZE) | parallel -k ln -Lsr {} work_flatten
+	@echo "sampled $(WORKING_SAMPLE_SIZE) files"
+	@touch $@
+
+work_flatten: work_flatten/.done
+    @:
+
 all-reads.txt: flattened/.done raw/.done
 	@find flattened -mindepth 1 -not -path '*/\.*'  > all-reads.txt
 
@@ -56,17 +68,17 @@ sample: flattened/.done
 	@echo "Sampling the flattened files to $$(pwd)/sample"
 	@rm -Rf sample
 	@mkdir sample
-	@find extracted -type f | shuf | head | parallel -k ln {} sample
+	@find extracted -type f -name '*.fast5' | shuf | head | parallel -k ln {} sample
 	@echo "sampled 10 files"
 clean:
-	rm -Rf extracted flattened sample
+	rm -Rf extracted flattened sample work_flatten
 ref.fasta:
 	@wget $(REF_URL) -O ref.fasta
 
 .PHONY: extract download sample check-raw check-extracted tt
 
-chiron_out/.done: flattened/.done
-	../bin/chiron_basecall $$(pwd) flattened chiron_out
+chiron_out/.done: work_flatten/.done
+	../bin/chiron_basecall $$(pwd) work_flatten chiron_out
 	@echo "Basecalled all files with chiron"
 	@touch $@
 

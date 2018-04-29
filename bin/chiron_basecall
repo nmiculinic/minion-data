@@ -4,15 +4,15 @@ echo $@
 echo $1
 echo $2
 echo $3
-CHIRON_IMAGE=${CHIRON_IMAGE:-nmiculinic/chiron:latest-py3}
-CHIRON_BATCH_SIZE=${CHIRON_BATCH_SIZE:-1000}
+CHIRON_IMAGE=${CHIRON_IMAGE:=nmiculinic/chiron:latest-py3}
+CHIRON_BATCH_SIZE=${CHIRON_BATCH_SIZE:=1000}
 
 if [ -z ${CHRION_GPU+x} ]; then
-    echo "Using $(CHIRON_IMAGE) GPU edition"
-    docker run --rm -it -u=`id -u`:`id -g` -v $1:/data $(CHIRON_IMAGE) chiron call --batch_size $(CHIRON_BATCH_SIZE) -i /data/$2 -o /data/$3
+    echo "Using $CHIRON_IMAGE CPU edition"
+    docker run --rm -it -u=`id -u`:`id -g` -v $1:/data $CHIRON_IMAGE chiron call --batch_size $CHIRON_BATCH_SIZE -i /data/$2 -o /data/$3
 else
-    CHIRON_IMAGE="$(CHIRON_IMAGE)-gpu"
-    echo "Using $(CHIRON_IMAGE) GPU edition"
-    docker run --rm -it -u=`id -u`:`id -g` --runtime=nvidia -v $1:/data $(CHIRON_IMAGE) chiron call --batch_size $(CHIRON_BATCH_SIZE) -i /data/$2 -o /data/$3
+    CHIRON_IMAGE="$CHIRON_IMAGE-gpu"
+    echo "Using $CHIRON_IMAGE GPU edition"
+    docker run --rm -it -u=`id -u`:`id -g` --runtime=nvidia -v $1:/data $CHIRON_IMAGE chiron call --batch_size $CHIRON_BATCH_SIZE -i /data/$2 -o /data/$3
 fi
 
