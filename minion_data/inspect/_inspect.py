@@ -57,19 +57,21 @@ def calc_stats(dp: dataset_pb2.DataPoint) -> pd.DataFrame:
     items.append(("Basecalled length", len(dp.basecalled)))
     items.append(("Reference length", len(dp.aligned_ref)))
     occ = toolz.frequencies(dp.cigar)
-    items.append(
-        ("Match Rate", occ.get(dataset_pb2.MATCH, 0) / len(dp.aligned_ref))
-    )
+    items.append((
+        "Match Rate",
+        occ.get(dataset_pb2.MATCH, 0) / len(dp.aligned_ref),
+    ))
     items.append((
         "Mismatch Rate",
         occ.get(dataset_pb2.MISMATCH, 0) / len(dp.aligned_ref),
     ))
     items.append((
         "Insertion Rate",
-        occ.get(dataset_pb2.INSERTION, 0) / len(dp.aligned_ref)
+        occ.get(dataset_pb2.INSERTION, 0) / len(dp.aligned_ref),
     ))
     items.append((
-        "Deletion Rate", occ.get(dataset_pb2.DELETION, 0) / len(dp.aligned_ref)
+        "Deletion Rate",
+        occ.get(dataset_pb2.DELETION, 0) / len(dp.aligned_ref),
     ))
     items.append(("Signal sample/bases", len(signal) / len(dp.basecalled)))
     return pd.DataFrame(items, columns=("Attribute", "Value"))
