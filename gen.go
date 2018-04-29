@@ -3,6 +3,7 @@ package main
 import (
 	"text/template"
 	"os"
+	"fmt"
 )
 /*
 
@@ -72,6 +73,11 @@ type Item struct {
 const EColiRef = "https://www.ncbi.nlm.nih.gov/sviewer/viewer.cgi?tool=portal&save=file&log$=seqview&db=nuccore&report=fasta&id=1356591284&extrafeat=976&conwithfeat=on&hide-sequence=on"
 
 func main() {
+	fmt.Println(`
+.FORCE:
+proto: .FORCE
+	python -m grpc_tools.protoc -I $$(pwd)/protos --mypy_out=./minion_data --python_out=./minion_data $$(pwd)/protos/*
+`)
 	t := template.Must(template.New("x").Parse(tmpl))
 	for _, f := range []Item{
 		{

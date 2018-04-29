@@ -68,7 +68,7 @@ def get_target_sequences(sam_path):
                 length = len(target)
             result_dict[name] = [target, ref_name, start_pos, length, cigar_str]
 
-    logging.warning("Results: %s", str(cnt.items()))
+    logging.info("Results: %s", str(cnt.items()))
     return result_dict
 
 

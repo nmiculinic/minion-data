@@ -9,6 +9,8 @@ install_requires=[
     'tqdm>=4.23.0',
     'numpy>=1.14.0',
     'pandas>=0.22.0',
+    'mypy-protobuf>=1.3',
+    "grpcio-tools>=1.11",
 ]
 
 setup(
