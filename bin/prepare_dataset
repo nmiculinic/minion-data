@@ -1,5 +1,5 @@
 #!/bin/sh
-# folder
+
 echo $@
 echo "dir: $1"
 echo "using ${MINION_DATA:="nmiculinic/minion_data"} as image"

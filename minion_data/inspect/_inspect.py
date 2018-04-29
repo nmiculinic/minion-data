@@ -54,7 +54,7 @@ def run(args):
     if os.path.isdir(args.file):
         stats = defaultdict(list)
         ordering = []
-        for fname in glob.glob(args.file + "*.datapoint"):
+        for fname in glob.glob(args.file + "/*.datapoint"):
             with gzip.open(fname, "rb") as f:
                 g = f.read()
                 dp = dataset_pb2.DataPoint()
