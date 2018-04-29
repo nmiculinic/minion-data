@@ -1,4 +1,11 @@
-Description of possible files within each directory:
+
+Folder structure:
+
+* **bin:** Various binary utilites to make this possible
+* **minion_data** Root package folder for further data processing
+* **protos** Protobuff file descriptors
+
+Each data source contains (or will contain) following files/folders:
 
 * **raw:**  Raw fast5 read in tar format
 * **checksum.raw.sha512:** checksum of all files in raw/
@@ -13,5 +20,8 @@ Description of possible files within each directory:
 
 Helper files:
 * **ref.fasta.gmidx:** Graphmap's index
+
+Example one is r9.4-sample, others are names <chemistry>-<specie>-source.
+
 
 
