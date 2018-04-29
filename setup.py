@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 # import numpy as np
 # from Cython.Build import cythonize
 
-install_requires=[
+install_requires = [
     'pysam>=0.14.0',
     'tqdm>=4.23.0',
     'numpy>=1.14.0',
