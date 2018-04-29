@@ -3,12 +3,21 @@ raw/
 extracted/
 flattened/
 sample/
+chiron_out/
 checksum.extracted.sha512
 !r9.4-sample/raw
 !r9.4-sample/raw/*
 .idea
 
 r9.4-ecoli-loman/Ecoli_MinKNOW_1.4_RAD002_Sambrook.tar
+
+# Intermediate steps
+
+*.sam
+*.fastq
+
+# graphmap files
+*.gmidx
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

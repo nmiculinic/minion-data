@@ -57,6 +57,10 @@ create-check-%:
 {{ .Name }}-chiron_basecall:
 {{ print "\t" -}} @$(MAKE) --no-print-directory {{ $extra }} -L chiron_basecall -f ../single.Makefile
 .PHONY: {{ .Name }}-chiron_basecall
+
+{{ .Name }}-align:
+{{ print "\t" -}} @$(MAKE) --no-print-directory {{ $extra }} -L alignment.sam -f ../single.Makefile
+.PHONY: {{ .Name }}-align
 `
 
 type Item struct {

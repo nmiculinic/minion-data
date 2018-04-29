@@ -70,7 +70,13 @@ chiron_out/.done: flattened/.done
 	@echo "Basecalled all files with chiron"
 	@touch $@
 
-chiron_basecall: chiron_out/.done
-    @:
+basecalled.fastq: chiron_out/.done
+	@cat chiron_out/result/*.fastq > basecalled.fastq
 
+chiron_basecall: basecalled.fastq
+	@:
 .PHONY: chiron_basecall
+
+alignment.sam: basecalled.fastq
+	../bin/graphmap $$(pwd) basecalled.fastq $@
+

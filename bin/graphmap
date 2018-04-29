@@ -1,0 +1,8 @@
+#!/bin/sh
+# folder, input path within foler, output path within folder
+# directory, reads within directory, output file
+echo $@
+echo "dir: $1"
+echo "reads: $2"
+echo "3 $3"
+docker run --rm -it -u=`id -u`:`id -g` -v $1:/data ${GRAPHMAP_IMAGE:-"nmiculinic/graphmap"} align -r /data/ref.fasta -d /data/$2 -o /data/$3 --extcigar
