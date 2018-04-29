@@ -8,6 +8,7 @@ from .. import dataset_pb2
 import pandas as pd
 from google.protobuf import json_format
 
+
 def debug_output(pb: dataset_pb2.DataPoint, screen_width: int = 120):
     ttbl = {
         dataset_pb2.MATCH: "=",
@@ -36,11 +37,13 @@ def debug_output(pb: dataset_pb2.DataPoint, screen_width: int = 120):
         )
         print("------", "-" * screen_width)
 
+
 def count(x):
     sol = 0
     for _ in x:
         sol += 1
     return sol
+
 
 def calc_stats(dp: dataset_pb2.DataPoint) -> pd.DataFrame:
     items = []
@@ -52,11 +55,26 @@ def calc_stats(dp: dataset_pb2.DataPoint) -> pd.DataFrame:
     items.append(("Signal value std", np.std(signal)))
     items.append(("Basecalled length", len(dp.basecalled)))
     items.append(("Reference length", len(dp.aligned_ref)))
-    items.append(("Match Rate", count(filter(lambda x:x == dataset_pb2.MATCH, dp.cigar))/ len(dp.aligned_ref)))
-    items.append(("Mismatch Rate", count(filter(lambda x:x == dataset_pb2.MISMATCH, dp.cigar))/ len(dp.aligned_ref)))
-    items.append(("Insertion Rate", count(filter(lambda x:x == dataset_pb2.INSERTION, dp.cigar))/ len(dp.aligned_ref)))
-    items.append(("Deletion Rate", count(filter(lambda x:x == dataset_pb2.DELETION, dp.cigar))/ len(dp.aligned_ref)))
-    items.append(("Signal sample/bases", len(signal) / len(dp.basecalled) ))
+    items.append((
+        "Match Rate", count(filter(lambda x: x == dataset_pb2.MATCH, dp.cigar))
+        / len(dp.aligned_ref)
+    ))
+    items.append((
+        "Mismatch Rate",
+        count(filter(lambda x: x == dataset_pb2.MISMATCH, dp.cigar)) /
+        len(dp.aligned_ref)
+    ))
+    items.append((
+        "Insertion Rate",
+        count(filter(lambda x: x == dataset_pb2.INSERTION, dp.cigar)) /
+        len(dp.aligned_ref)
+    ))
+    items.append((
+        "Deletion Rate",
+        count(filter(lambda x: x == dataset_pb2.DELETION, dp.cigar)) /
+        len(dp.aligned_ref)
+    ))
+    items.append(("Signal sample/bases", len(signal) / len(dp.basecalled)))
     return pd.DataFrame(items, columns=("Attribute", "Value"))
 
 
@@ -89,7 +107,14 @@ def run(args):
                     np.max(arr),
                     np.std(arr),
                 ))
-            print(pd.DataFrame(items, columns=("Attribute", "Min", "Median", "Mean", "Max", "stddev")))
+            print(
+                pd.DataFrame(
+                    items,
+                    columns=(
+                        "Attribute", "Min", "Median", "Mean", "Max", "stddev"
+                    )
+                )
+            )
 
     elif os.path.isfile(args.file):
         with gzip.open(args.file, "rb") as f:
@@ -103,8 +128,13 @@ def run(args):
     else:
         raise ValueError(f"Not sure what to do with {args.file}")
 
-def add_args(parser:argparse.ArgumentParser):
+
+def add_args(parser: argparse.ArgumentParser):
     parser.add_argument("file", help="file name to inspect")
-    parser.add_argument("--stat", help="Basic file stats", action="store_true", default=True)
-    parser.add_argument("--cigar", help="Display CIGAR alignment", action="store_true")
+    parser.add_argument(
+        "--stat", help="Basic file stats", action="store_true", default=True
+    )
+    parser.add_argument(
+        "--cigar", help="Display CIGAR alignment", action="store_true"
+    )
     parser.set_defaults(func=run)

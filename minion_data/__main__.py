@@ -10,13 +10,19 @@ class MinionDataCfg(NamedTuple):
     out: str
 
 
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="minion_data")
-    subparsers = parser.add_subparsers(title='sub command', help='sub command help')
-    preparation.add_args(subparsers.add_parser('prepare_dataset', description='Prepare dataset'))
-    inspect.add_args(subparsers.add_parser("inspect", description="Inspect specific datapoint"))
+    subparsers = parser.add_subparsers(
+        title='sub command', help='sub command help'
+    )
+    preparation.add_args(
+        subparsers.add_parser('prepare_dataset', description='Prepare dataset')
+    )
+    inspect.add_args(
+        subparsers.add_parser(
+            "inspect", description="Inspect specific datapoint"
+        )
+    )
 
     args = parser.parse_args()
     if hasattr(args, 'func'):

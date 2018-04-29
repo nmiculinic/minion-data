@@ -180,7 +180,8 @@ def run(args):
     main(cfg)
     return 0
 
-def add_args(parser:argparse.ArgumentParser):
+
+def add_args(parser: argparse.ArgumentParser):
     parser.add_argument("--default-root")
     parser.add_argument("--chiron-out")
     parser.add_argument("--sam_file")
