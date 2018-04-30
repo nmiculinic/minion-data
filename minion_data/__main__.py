@@ -12,6 +12,7 @@ class MinionDataCfg(NamedTuple):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(prog="minion_data")
+    parser.add_argument("--debug", action="store_true")
     subparsers = parser.add_subparsers(
         title='sub command', help='sub command help'
     )
