@@ -24,32 +24,36 @@ class ProcessDataPointCfg(NamedTuple):
 
 
 def processDataPoint(cfgDp: ProcessDataPointCfg):
-    cfg = cfgDp.cfg
-    sol = dataset_pb2.DataPoint()
-    with open(cfgDp.fname_no_ext + ".signal", "r") as f:
-        signal = np.array(f.readlines()[0].split(), dtype=np.float)
-        sol.MergeFrom(dataset_pb2.DataPoint(signal=signal))
+    try:
+        cfg = cfgDp.cfg
+        sol = dataset_pb2.DataPoint()
+        with open(cfgDp.fname_no_ext + ".signal", "r") as f:
+            signal = np.array(f.readlines()[0].split(), dtype=np.float)
+            sol.MergeFrom(dataset_pb2.DataPoint(signal=signal))
 
-    with open(cfgDp.fname_no_ext + ".label", "r") as f:
-        lower_bound = []
-        bcall = []
-        for l, _, b in [x.split() for x in f.readlines() if len(x)]:
-            lower_bound.append(np.int(l))
-            bcall.append(dataset_pb2.BasePair.Value(b))
-    sol.MergeFrom(
-        dataset_pb2.DataPoint(
-            basecalled=bcall,
-            lower_bound=lower_bound,
-            cigar=[dataset_pb2.MATCH] * len(bcall),
-            aligned_ref=bcall,
-            aligned_ref_squiggle=bcall,
-            basecalled_squiggle=bcall,
+        with open(cfgDp.fname_no_ext + ".label", "r") as f:
+            lower_bound = []
+            bcall = []
+            for l, _, b in [x.split() for x in f.readlines() if len(x)]:
+                lower_bound.append(np.int(l))
+                bcall.append(dataset_pb2.BasePair.Value(b.upper()))
+        sol.MergeFrom(
+            dataset_pb2.DataPoint(
+                basecalled=bcall,
+                lower_bound=lower_bound,
+                cigar=[dataset_pb2.MATCH] * len(bcall),
+                aligned_ref=bcall,
+                aligned_ref_squiggle=bcall,
+                basecalled_squiggle=bcall,
+            )
         )
-    )
-    with gzip.open(path.join(cfg.out, cfgDp.fname_no_ext.split(os.pathsep)[-1] + ".datapoint"), "w") as f:
-        sol_pb_str = sol.SerializeToString()
-        f.write(sol_pb_str)
-    cfgDp.completed.put(sol_pb_str)
+        with gzip.open(path.join(cfg.out, cfgDp.fname_no_ext.split(os.pathsep)[-1] + ".datapoint"), "w") as f:
+            sol_pb_str = sol.SerializeToString()
+            f.write(sol_pb_str)
+        cfgDp.completed.put(sol_pb_str)
+    except Exception as ex:
+        logging.getLogger(__name__).error(f"Cannot process {cfgDp.fname_no_ext} {type(ex).__name__}\n{ex}", exc_info=True)
+        cfgDp.completed.put(ex)
 
 
 def main(cfg: MinionDataCfg):

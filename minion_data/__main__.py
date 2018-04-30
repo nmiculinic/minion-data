@@ -1,7 +1,13 @@
 import argparse
 from typing import NamedTuple
 import sys
-from . import preparation, inspect
+from minion_data import preparation, inspect
+import logging
+from tqdm import tqdm
+
+class TqdmWrapper():
+    def write(self, s):
+        tqdm.write(s, end="")
 
 
 class MinionDataCfg(NamedTuple):
@@ -27,6 +33,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     if hasattr(args, 'func'):
+        root_logger = logging.getLogger()
+        h = logging.StreamHandler(
+            TqdmWrapper(),
+        )
+        h.setLevel(logging.DEBUG if args.debug else logging.INFO)
+        h.setFormatter(logging.Formatter(logging.BASIC_FORMAT))
+        root_logger.addHandler(h)
         sys.exit(args.func(args))
     else:
         parser.print_help()
