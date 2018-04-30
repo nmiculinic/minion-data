@@ -47,7 +47,8 @@ def processDataPoint(cfgDp: ProcessDataPointCfg):
                 basecalled_squiggle=bcall,
             )
         )
-        with gzip.open(path.join(cfg.out, cfgDp.fname_no_ext.split(os.pathsep)[-1] + ".datapoint"), "w") as f:
+        fname_out = path.join(cfg.out, cfgDp.fname_no_ext.split(os.sep)[-1] + ".datapoint")
+        with gzip.open(fname_out, "w") as f:
             sol_pb_str = sol.SerializeToString()
             f.write(sol_pb_str)
         cfgDp.completed.put(sol_pb_str)
@@ -78,7 +79,6 @@ def main(cfg: MinionDataCfg):
                     completed=q,
                 ) for x in all]
             )
-
 
 def run(args):
     logging.basicConfig(level=logging.INFO)
