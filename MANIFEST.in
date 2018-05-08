@@ -1,0 +1,9 @@
+# Include the README
+include *.md
+
+# Include the license file
+include LICENSE.md
+
+# Include the data files
+recursive-include protos *
+recursive-include minion_data *.pyi

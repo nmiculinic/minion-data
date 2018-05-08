@@ -29,4 +29,7 @@ message DataPoint {
     // squiggled are the same length with blanks inserted for space filling. Matches/mismatched are aligned with BLANKS
     repeated BasePair aligned_ref_squiggle = 10; // Which is the reference string for this read after aligning, BLANKS inserted for aligments
     repeated BasePair basecalled_squiggle = 11; // What the  BLANKS inserted for aligments
+
+    reserved 12 to 100; // Further assigement
+    reserved 101 to 110; // For further Mincall use
 }
