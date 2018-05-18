@@ -22,7 +22,7 @@ def debug_output(pb: dataset_pb2.DataPoint, screen_width: int = 120):
     def ff(x):
         if x == dataset_pb2.BLANK:
             return "-"
-        return dataset_pb2.BasePair.Name(x.upper())
+        return dataset_pb2.BasePair.Name(x)
 
     for i in range(0, len(pb.cigar), screen_width):
         print(

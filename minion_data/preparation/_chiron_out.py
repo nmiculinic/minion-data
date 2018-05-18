@@ -9,6 +9,7 @@ from typing import NamedTuple
 from .align_utils import get_target_sequences
 from .. import dataset_pb2
 from . import bioinf_utils
+from .common import fillDataPoint
 import numpy as np
 import sys
 import multiprocessing as mp
@@ -50,48 +51,7 @@ def processDataPoint(cfgDp: ProcessDataPointCfg):
                 )
             )
 
-        ref_idx = 0
-        bcall_idx = 0
-
-        aligned_ref_squiggle = []
-        basecalled_squiggle = []
-        cigar_lst = []
-
-        for cigar in cigar_str:
-            if cigar in bioinf_utils.CIGAR_MATCH_MISSMATCH:
-                cigar_lst.append(
-                    dataset_pb2.MATCH
-                    if cigar in bioinf_utils.CIGAR_MATCH else dataset_pb2.MISMATCH
-                )
-                aligned_ref_squiggle.append(ref[ref_idx])
-                basecalled_squiggle.append(bcall[bcall_idx])
-                ref_idx += 1
-                bcall_idx += 1
-            elif cigar in bioinf_utils.CIGAR_INSERTION:
-                cigar_lst.append(dataset_pb2.INSERTION)
-                basecalled_squiggle.append(bcall[bcall_idx])
-                aligned_ref_squiggle.append(dataset_pb2.BLANK)
-                bcall_idx += 1
-            elif cigar in bioinf_utils.CIGAR_DELETION:
-                cigar_lst.append(dataset_pb2.DELETION)
-                basecalled_squiggle.append(dataset_pb2.BLANK)
-                aligned_ref_squiggle.append(ref[ref_idx])
-                ref_idx += 1
-            else:
-                raise ValueError(f"Not sure what to do with {cigar}")
-
-        assert len(cigar_lst) == len(aligned_ref_squiggle)
-        assert len(cigar_lst) == len(basecalled_squiggle)
-        assert ref_idx == len(ref)
-        assert bcall_idx == len(bcall)
-
-        sol.MergeFrom(
-            dataset_pb2.DataPoint(
-                cigar=cigar_lst,
-                aligned_ref_squiggle=aligned_ref_squiggle,
-                basecalled_squiggle=basecalled_squiggle,
-            )
-        )
+        fillDataPoint(sol, cigar_str)
         with gzip.open(path.join(cfg.out, name + ".datapoint"), "w") as f:
             sol_pb_str = sol.SerializeToString()
             f.write(sol_pb_str)
