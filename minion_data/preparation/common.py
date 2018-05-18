@@ -15,7 +15,6 @@ def fillDataPoint(dp: dataset_pb2.DataPoint, cigar: str=None):
             "".join([dataset_pb2.BasePair.Name(x) for x in dp.basecalled]),
             "".join([dataset_pb2.BasePair.Name(x) for x in dp.aligned_ref]),
         task="path")
-        print(res)
         cigar = bioinf_utils.decompress_cigar(res['cigar'])
 
     ref_idx = 0

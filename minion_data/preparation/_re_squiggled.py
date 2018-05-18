@@ -89,21 +89,20 @@ def processDataPoint(cfgDp: ProcessDataPointCfg):
             fillDataPoint(sol)
 
             lower_bound_idx = 0
-            raw_data_
-            lower_bound= np.zeros(shape=(len(basecalled, )), dtype=np.int)
-
-            for i, x in enumerate(sol.basecalled_squiggle):
-                if x != dataset_pb2.BLANK:
-                    try:
-                        lower_bound[lower_bound_idx] = raw_data_array[i][0]
-                    except:
-                        print(lower_bound_idx, i, raw_data_array[i])
+            raw_data_idx = -1
+            lower_bound = np.zeros(shape=(len(basecalled, )), dtype=np.int)
+            for i in range(len(sol.basecalled_squiggle)):
+                if sol.basecalled_squiggle[i] != dataset_pb2.BLANK:
+                    lower_bound[lower_bound_idx] = raw_data_array[max(raw_data_idx, 0)][0]
+                    lower_bound_idx += 1
+                if sol.aligned_ref_squiggle[i] != dataset_pb2.BLANK:
+                    raw_data_idx += 1
+            assert lower_bound_idx == len(basecalled), f"{lower_bound} != {len(basecalled)}"
+            assert raw_data_idx + 1 == len(raw_data_array), f"{raw_data_idx + 1} != {len(raw_data_array)}"
 
             sol.MergeFrom(dataset_pb2.DataPoint(
                 lower_bound=lower_bound
             ))
-            debug_output(sol)
-
 
         fname_out = path.join(cfg.out, cfgDp.fname_no_ext.split(os.sep)[-1] + ".datapoint")
         with gzip.open(fname_out, "w") as f:
