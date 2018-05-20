@@ -32,15 +32,21 @@ def processDataPoint(cfgDp: ProcessDataPointCfg):
             sol.MergeFrom(dataset_pb2.DataPoint(signal=signal))
 
         with open(cfgDp.fname_no_ext + ".label", "r") as f:
-            lower_bound = []
-            bcall = []
-            for l, _, b in [x.split() for x in f.readlines() if len(x)]:
-                lower_bound.append(np.int(l))
+            labels = []
+            bcall: typing.List[dataset_pb2.BasePair] = []
+            for l, u, b in [x.split() for x in f.readlines() if len(x)]:
+                labels.append(
+                    dataset_pb2.DataPoint.BPConfidenceInterval(
+                        lower=l,
+                        upper=u,
+                        pair=typing.cast(dataset_pb2.BasePair, dataset_pb2.BasePair.Value(b.upper())),
+                    )
+                )
                 bcall.append(dataset_pb2.BasePair.Value(b.upper()))
         sol.MergeFrom(
             dataset_pb2.DataPoint(
                 basecalled=bcall,
-                lower_bound=lower_bound,
+                labels=labels,
                 cigar=[dataset_pb2.MATCH] * len(bcall),
                 aligned_ref=bcall,
                 aligned_ref_squiggle=bcall,

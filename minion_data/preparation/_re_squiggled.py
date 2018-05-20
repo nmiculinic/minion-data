@@ -75,34 +75,23 @@ def processDataPoint(cfgDp: ProcessDataPointCfg):
                 list(zip(event_starts, event_lengths, event_bases)),
                 dtype=[('start', '<u4'), ('length', '<u4'), ('base', 'S1')])
 
-            raw_data_array = []
+            labels = []
             for index, start in enumerate(event_starts):
-                raw_data_array.append(
-                    [start, start + event_lengths[index], label_data['base'][index].decode("ASCII")])
-
-            aligned_basecalled = "".join([x[2] for x in raw_data_array])
+                labels.append(dataset_pb2.DataPoint.BPConfidenceInterval(
+                    lower=start,
+                    upper=start + event_lengths[index],
+                    pair=typing.cast(
+                        dataset_pb2.BasePair,
+                        dataset_pb2.BasePair.Value(label_data['base'][index].decode("ASCII").upper())),
+                    ),
+                )
 
             sol.MergeFrom(dataset_pb2.DataPoint(
                 basecalled=[typing.cast(dataset_pb2.BasePair, dataset_pb2.BasePair.Value(x)) for x in basecalled],
-                aligned_ref=[typing.cast(dataset_pb2.BasePair, dataset_pb2.BasePair.Value(x)) for x in aligned_basecalled],
+                aligned_ref=[x.pair for x in labels],
+                labels=labels,
             ))
             fillDataPoint(sol)
-
-            lower_bound_idx = 0
-            raw_data_idx = -1
-            lower_bound = np.zeros(shape=(len(basecalled, )), dtype=np.int)
-            for i in range(len(sol.basecalled_squiggle)):
-                if sol.basecalled_squiggle[i] != dataset_pb2.BLANK:
-                    lower_bound[lower_bound_idx] = raw_data_array[max(raw_data_idx, 0)][0]
-                    lower_bound_idx += 1
-                if sol.aligned_ref_squiggle[i] != dataset_pb2.BLANK:
-                    raw_data_idx += 1
-            assert lower_bound_idx == len(basecalled), f"{lower_bound} != {len(basecalled)}"
-            assert raw_data_idx + 1 == len(raw_data_array), f"{raw_data_idx + 1} != {len(raw_data_array)}"
-
-            sol.MergeFrom(dataset_pb2.DataPoint(
-                lower_bound=lower_bound
-            ))
 
         fname_out = path.join(cfg.out, cfgDp.fname_no_ext.split(os.sep)[-1] + ".datapoint")
         with gzip.open(fname_out, "w") as f:

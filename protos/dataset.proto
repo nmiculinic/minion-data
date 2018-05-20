@@ -17,10 +17,17 @@ enum Cigar {
     DELETION = 3;  // Deletion, N, P
 }
 
+
+
 message DataPoint {
+    message BPConfidenceInterval {
+        uint64 lower = 1;
+        uint64 upper = 2;
+        BasePair pair = 3;
+    }
     repeated float signal = 1;
     repeated BasePair basecalled = 2; // What we basecalled
-    repeated uint32 lower_bound = 3; // lower_bound[i] is the lower bound for basecalled[i] appears in the signal
+    repeated BPConfidenceInterval labels = 3; // labels describe corrected basecalled signal for training
 
     // Aligment data:
     repeated Cigar cigar = 8;
