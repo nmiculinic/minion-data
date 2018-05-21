@@ -7,6 +7,7 @@ import numpy as np
 from .. import dataset_pb2
 import pandas as pd
 import cytoolz as toolz
+from tqdm import tqdm
 from multiprocessing import pool
 from google.protobuf import json_format
 
@@ -82,7 +83,7 @@ def run(args):
     if os.path.isdir(args.file):
         stats = defaultdict(list)
         ordering = []
-        for fname in glob.glob(args.file + "/*.datapoint"):
+        for fname in tqdm(glob.glob(args.file + "/*.datapoint")):
             with gzip.open(fname, "rb") as f:
                 g = f.read()
                 dp = dataset_pb2.DataPoint()
