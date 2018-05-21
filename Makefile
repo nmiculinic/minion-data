@@ -21,6 +21,28 @@ docker-push: docker-build
 	docker push $(BASE_TAG)minion_data:$(TAG)
 .PHONY: docker-push
 
+# Reference hybrid assembly
+rwick_basecaller/01_raw_fast5/barcode01.fasta.gz:
+	@mkdir -p rwick_basecaller/01_raw_fast5
+	wget https://ndownloader.figshare.com/files/8810704 -O $@
+
+# Illumina reads
+rwick_basecaller/01_raw_fast5/barcode01_1.fastq.gz:
+	@mkdir -p rwick_basecaller/01_raw_fast5
+	wget https://ndownloader.figshare.com/files/8811145 -O $@
+
+rwick_basecaller/01_raw_fast5/barcode01_2.fastq.gz:
+	@mkdir -p rwick_basecaller/01_raw_fast5
+	wget https://ndownloader.figshare.com/files/8811148 -O $@
+
+# Raw fast5 files
+
+rwick_basecaller/.done: rwick_basecaller/01_raw_fast5/barcode01_2.fastq.gz rwick_basecaller/01_raw_fast5/barcode01_1.fastq.gz rwick_basecaller/01_raw_fast5/barcode01.fasta.gz
+	@mkdir -p rwick_basecaller/02_basecalled_reads
+	@touch $@
+
+rwick: rwick_basecaller/.done
+
 sample-make-sample:
 	@$(MAKE) --no-print-directory -C r9.4-sample -e BASE_URL='MISSING!' REF_URL='https://www.ncbi.nlm.nih.gov/sviewer/viewer.cgi?tool=portal&save=file&log$=seqview&db=nuccore&report=fasta&id=1356591284&extrafeat=976&conwithfeat=on&hide-sequence=on' -L sample -f ../single.Makefile
 .PHONY: sample-make-sample
