@@ -124,7 +124,7 @@ rwick_basecaller/01_raw_fast5/INF042_raw_fast5.tar:
 
 rwick_basecaller/.done: rwick_basecaller/01_raw_fast5/barcode01_2.fastq.gz rwick_basecaller/01_raw_fast5/barcode01_1.fastq.gz rwick_basecaller/01_raw_fast5/barcode01.fasta.gz rwick_basecaller/01_raw_fast5/INF042_raw_fast5.tar
 	@mkdir -p rwick_basecaller/02_basecalled_reads
-	@tar -xf rwick_basecaller/01_raw_fast5/INF042_raw_fast5.tar --directory rwick_basecaller/01_raw_fast5
+	tar -xf rwick_basecaller/01_raw_fast5/INF042_raw_fast5.tar --directory rwick_basecaller/01_raw_fast5
 	@touch $@
 
 rwick: rwick_basecaller/.done
