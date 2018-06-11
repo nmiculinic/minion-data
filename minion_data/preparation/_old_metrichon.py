@@ -1,4 +1,12 @@
 import os
+from os import path
+import gzip
+import argparse
+import logging
+from tqdm import tqdm
+import threading
+import multiprocessing as mp
+from glob import glob
 from minion_data.preparation import bioinf_utils
 from pprint import pprint
 import numpy as np
@@ -61,7 +69,8 @@ def read_fast5(fast5_path):
             'signal_len': signal_len
         }
 
-def read_fast5_raw_ref(fast5_path, ref_path=None, verify_file=True, correct=True):
+
+def read_fast5_raw_ref(fast5_path, ref_path=None, verify_file=True, correct=True) -> dataset_pb2.DataPoint:
     fast5 = read_fast5(fast5_path)
 
     signal = fast5['signal']
@@ -139,6 +148,70 @@ def read_fast5_raw_ref(fast5_path, ref_path=None, verify_file=True, correct=True
         labels=corrected_labels
     ))
     return dp
+
+
+class MinionDataCfg(NamedTuple):
+    input: str
+    out: str
+
+
+class ProcessDataPointCfg(NamedTuple):
+    fast5: str
+    cfg: MinionDataCfg
+    completed: mp.Queue
+
+
+def processDataPoint(cfgDp: ProcessDataPointCfg):
+    try:
+        fname_out = path.join(cfgDp.cfg.out, path.splitext(cfgDp.fast5)[0].split(os.sep)[-1] + ".datapoint")
+        sol = read_fast5_raw_ref(cfgDp.fast5)
+        with gzip.open(fname_out, "w") as f:
+            sol_pb_str = sol.SerializeToString()
+            f.write(sol_pb_str)
+        cfgDp.completed.put(sol_pb_str)
+    except Exception as ex:
+        logging.getLogger(__name__).error(f"Cannot process {cfgDp.fast5} {type(ex).__name__}\n{ex}", exc_info=True)
+        cfgDp.completed.put(ex)
+
+
+def main(cfg: MinionDataCfg):
+    os.makedirs(cfg.input, exist_ok=True)
+    all = glob(cfg.out + "/*.fast5")
+    with tqdm(total=len(all), desc="preparing dataset") as pbar:
+        with mp.Pool() as p:
+            m = mp.Manager()
+            q = m.Queue()
+
+            def f():
+                for _ in range(len(all)):
+                    q.get()
+                    pbar.update()
+
+            threading.Thread(target=f, daemon=True).start()
+            p.map(
+                processDataPoint,
+                [ProcessDataPointCfg(
+                    fast5=x,
+                    cfg=cfg,
+                    completed=q,
+                ) for x in all]
+            )
+
+
+def run(args):
+    logging.basicConfig(level=logging.INFO)
+    if args.debug:
+        logging.basicConfig(level=logging.DEBUG)
+    main(MinionDataCfg(
+        input=args.input,
+        out=args.out,
+    ))
+
+
+def add_args(parser: argparse.ArgumentParser):
+    parser.add_argument("--input", "-i", help="input folder with fast5s", required=True)
+    parser.add_argument("--out", "-o", help="output folder", required=True)
+    parser.set_defaults(func=run)
 
 
 if __name__ == "__main__":
