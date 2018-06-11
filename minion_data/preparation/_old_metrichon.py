@@ -87,11 +87,14 @@ def read_fast5_raw_ref(fast5_path, ref_path=None, verify_file=True, correct=True
                     pair=dataset_pb2.BasePair.Value(bp),
                 ))
 
+    dp = dataset_pb2.DataPoint(
+        signal=signal,
+    )
     if not correct:
-        return dataset_pb2.DataPoint(
-            signal=signal,
-            labels=labels,
-        )
+        dp.MergeFrom(dataset_pb2.DataPoint(
+            labels=labels
+        ))
+        return dp
 
     ref_path = ref_path or find_ref(fast5_path)
     with open(ref_path, 'r') as f:
@@ -132,10 +135,10 @@ def read_fast5_raw_ref(fast5_path, ref_path=None, verify_file=True, correct=True
     assert ref_seq_idx == len(ref_seq)
     assert len(corrected_labels) == len(ref_seq)
 
-    return dataset_pb2.DataPoint(
-        signal=signal,
-        labels=corrected_labels,
-    )
+    dp.MergeFrom(dataset_pb2.DataPoint(
+        labels=corrected_labels
+    ))
+    return dp
 
 
 if __name__ == "__main__":
