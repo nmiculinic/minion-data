@@ -103,6 +103,10 @@ docker-push: docker-build
 	docker push $(BASE_TAG)minion_data:$(TAG)
 .PHONY: docker-push
 
+pypi-publish:
+	python setup.py bdist_wheel && twine upload dist/*
+
+.PHONY: pypi-publish
 # Reference hybrid assembly
 rwick_basecaller/01_raw_fast5/barcode01.fasta.gz:
 	@mkdir -p rwick_basecaller/01_raw_fast5
