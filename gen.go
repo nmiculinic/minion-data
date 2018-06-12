@@ -102,6 +102,11 @@ docker-build:
 docker-push: docker-build
 	docker push $(BASE_TAG)minion_data:$(TAG)
 .PHONY: docker-push
+
+pypi-publish:
+	python setup.py bdist_wheel && twine upload dist/*
+
+.PHONY: pypi-publish
 `)
 	t := template.Must(template.New("x").Parse(tmpl))
 	for _, f := range []Item{

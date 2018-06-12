@@ -21,6 +21,11 @@ docker-push: docker-build
 	docker push $(BASE_TAG)minion_data:$(TAG)
 .PHONY: docker-push
 
+pypi-publish:
+	python setup.py bdist_wheel && twine upload dist/*
+
+.PHONY: pypi-publish
+
 sample-make-sample:
 	@$(MAKE) --no-print-directory -C r9.4-sample -e BASE_URL='MISSING!' REF_URL='https://www.ncbi.nlm.nih.gov/sviewer/viewer.cgi?tool=portal&save=file&log$=seqview&db=nuccore&report=fasta&id=1356591284&extrafeat=976&conwithfeat=on&hide-sequence=on' -L sample -f ../single.Makefile
 .PHONY: sample-make-sample
