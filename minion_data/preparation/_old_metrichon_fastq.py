@@ -32,7 +32,7 @@ class ProcessDataPointCfg(NamedTuple):
 
 def main(cfg: MinionDataCfg):
     os.makedirs(cfg.input, exist_ok=True)
-    all = glob(cfg.out + "/*.fast5")
+    all = glob(cfg.input + "/*.fast5")
 
     for file in tqdm(all, desc="preparing dataset"):
         with h5py.File(file, "r") as f:
