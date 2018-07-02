@@ -182,8 +182,8 @@ def processDataPoint(cfgDp: ProcessDataPointCfg):
 
 
 def main(cfg: MinionDataCfg):
-    os.makedirs(cfg.input, exist_ok=True)
-    all = glob(cfg.out + "/*.fast5")
+    os.makedirs(cfg.out, exist_ok=True)
+    all = glob(cfg.input + "/*.fast5")
     with tqdm(total=len(all), desc="preparing dataset") as pbar:
         with mp.Pool() as p:
             m = mp.Manager()
