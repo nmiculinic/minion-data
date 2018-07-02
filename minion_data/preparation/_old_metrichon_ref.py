@@ -1,4 +1,5 @@
 import os
+import edlib
 from os import path
 import gzip
 import argparse
@@ -70,7 +71,7 @@ def read_fast5(fast5_path):
         }
 
 
-def read_fast5_raw_ref(fast5_path, ref_path=None, verify_file=True, correct=True) -> dataset_pb2.DataPoint:
+def read_fast5_raw_ref(fast5_path, correct=True, ref_cigar=None, ref_seq=None) -> dataset_pb2.DataPoint:
     fast5 = read_fast5(fast5_path)
 
     signal = fast5['signal']
@@ -104,17 +105,11 @@ def read_fast5_raw_ref(fast5_path, ref_path=None, verify_file=True, correct=True
             labels=labels
         ))
         return dp
+    elif ref_seq is None:
+        raise ValueError("Ref seq is None and correct is true")
 
-    ref_path = ref_path or find_ref(fast5_path)
-    with open(ref_path, 'r') as f:
-        ref = f.readlines()
-    _, ref_ext = os.path.splitext(ref_path)
-    if ref_ext == ".ref":
-        ref_seq = ref[3].strip()
-    else:
-        raise ValueError("extension not recognized %s" % ref_ext)
-    ref_cigar = ref[2].strip()
-    ref_seq = ref_seq.upper()
+    if ref_cigar is None:
+        raise NotImplemented()
 
     corrected_labels = []
     label_idx = 0
@@ -164,7 +159,19 @@ class ProcessDataPointCfg(NamedTuple):
 def processDataPoint(cfgDp: ProcessDataPointCfg):
     try:
         fname_out = path.join(cfgDp.cfg.out, path.splitext(cfgDp.fast5)[0].split(os.sep)[-1] + ".datapoint")
-        sol = read_fast5_raw_ref(cfgDp.fast5)
+
+        ref_path = find_ref(cfgDp.fast5)
+        with open(ref_path, 'r') as f:
+            ref = f.readlines()
+        _, ref_ext = os.path.splitext(ref_path)
+        if ref_ext == ".ref":
+            ref_seq = ref[3].strip()
+        else:
+            raise ValueError("extension not recognized %s" % ref_ext)
+        ref_cigar = ref[2].strip()
+        ref_seq = ref_seq.upper()
+
+        sol = read_fast5_raw_ref(cfgDp.fast5, ref_cigar=ref_cigar, ref_seq=ref_seq)
         with gzip.open(fname_out, "w") as f:
             sol_pb_str = sol.SerializeToString()
             f.write(sol_pb_str)

@@ -2,7 +2,8 @@ import argparse
 from . import _chiron_out
 from . import _signal_label
 from . import _re_squiggled
-from . import _old_metrichon
+from . import _old_metrichon_ref
+from . import _old_metrichon_fastq
 
 
 def add_args(parser: argparse.ArgumentParser):
@@ -24,6 +25,9 @@ def add_args(parser: argparse.ArgumentParser):
         """For further information how to resquiggle fast5 file see https://nanoraw.readthedocs.io/en/latest/resquiggle.html#example-commands
         """
     ))
-    _old_metrichon.add_args(subparsers.add_parser(
-        name="metrichon", help='Old hmm metrichon support'
+    _old_metrichon_ref.add_args(subparsers.add_parser(
+        name="metrichon-ref", help='Old hmm metrichon support. This assumes .ref files are present'
+    ))
+    _old_metrichon_fastq.add_args(subparsers.add_parser(
+        name="metrichon-fastq", help='Old hmm metrichon support. No .ref files needed'
     ))
